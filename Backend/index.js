@@ -52,6 +52,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
 
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`, req.body);
+  next();
+});
+
 // Root маршрут - Updated CORS config - 2025-01-26
 app.get('/', (req, res) => {
   res.send('running... CORS updated');

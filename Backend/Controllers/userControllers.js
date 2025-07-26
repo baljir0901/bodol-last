@@ -1,8 +1,8 @@
-const genjwttoken = require("../utils/genjwttoken");
+const genjwttoken = require('../utils/genjwttoken');
 
-const User = require("../Models/userModel");
-const bcrypt = require("bcryptjs");
-const { isValidObjectId } = require("mongoose");
+const User = require('../Models/userModel');
+const bcrypt = require('bcryptjs');
+const { isValidObjectId } = require('mongoose');
 
 //getuser
 const getUser = async (req, res) => {
@@ -10,20 +10,20 @@ const getUser = async (req, res) => {
     let { query } = req.params;
     if (isValidObjectId(query)) {
       let user = await User.findById(query)
-        .select("-password")
-        .select(".updatedAt");
+        .select('-password')
+        .select('.updatedAt');
       if (!user) {
-        return res.status(404).json({ error: "User not found" });
+        return res.status(404).json({ error: 'User not found' });
       } else {
         return res.status(200).json(user);
       }
     }
-    if (typeof query === "string") {
+    if (typeof query === 'string') {
       let user = await User.findOne({ username: query })
-        .select("-password")
-        .select(".updatedAt");
+        .select('-password')
+        .select('.updatedAt');
       if (!user) {
-        return res.status(404).json({ error: "User not found" });
+        return res.status(404).json({ error: 'User not found' });
       } else {
         return res.status(200).json(user);
       }
@@ -38,48 +38,68 @@ const registeruser = async (req, res) => {
   let { name, username, email, password } = req.body;
 
   try {
+    console.log('Signup attempt with data:', {
+      name,
+      username,
+      email,
+      password: '***',
+    });
+
     if (!name || !username || !email || !password) {
-      return res.status(400).json({ error: "All fields are required" });
+      console.log('Missing fields:', {
+        name: !!name,
+        username: !!username,
+        email: !!email,
+        password: !!password,
+      });
+      return res.status(400).json({ error: 'All fields are required' });
     }
 
     if (password.length < 6) {
-      return res.status(400).json({ error: "Minimum length of password is 6" });
+      console.log('Password too short:', password.length);
+      return res.status(400).json({ error: 'Minimum length of password is 6' });
     }
 
     // Check if a user with the given email or username already exists
+    console.log('Checking for existing user...');
     let user = await User.findOne({
       $or: [{ email: email }, { username: username }],
     });
 
     if (user) {
-      return res
-        .status(400)
-        .json({
-          error: "Sorry, a user with this email or username already exists",
-        });
+      console.log('User already exists:', user._id);
+      return res.status(400).json({
+        error: 'Sorry, a user with this email or username already exists',
+      });
     }
 
     // Hash the password
+    console.log('Hashing password...');
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create a new user
+    console.log('Creating new user...');
     let newUser = await User.create({
       name: name,
       username: username,
       email: email,
       password: hashedPassword,
     });
-    newUser = await User.findById(newUser._id).select("-password");
+    console.log('User created successfully:', newUser._id);
+
+    newUser = await User.findById(newUser._id).select('-password');
 
     if (newUser) {
+      console.log('Generating JWT token...');
       let usercookie = genjwttoken(newUser._id, res);
-      console.log(usercookie);
+      console.log('JWT token generated successfully');
       return res.status(200).json(newUser);
     }
   } catch (error) {
-    console.error("Error in signup:", error.message);
-    return res.status(500).json({ error: "Internal server error" });
+    console.error('Error in signup:', error.message);
+    console.error('Full error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };
 
@@ -89,29 +109,29 @@ const loginUser = async (req, res) => {
   try {
     let user = await User.findOne({ username });
     if (!user || !password) {
-      return res.status(400).json({ error: "Incorrect username or password" });
+      return res.status(400).json({ error: 'Incorrect username or password' });
     }
     let isPassCorrect = await bcrypt.compare(password, user.password);
     if (!isPassCorrect) {
-      return res.status(400).json({ error: "Incorrect username or password" });
+      return res.status(400).json({ error: 'Incorrect username or password' });
     }
     genjwttoken(user._id, res);
-    let loggedinUser = await User.findById(user._id).select("-password");
+    let loggedinUser = await User.findById(user._id).select('-password');
     return res.status(200).json(loggedinUser);
   } catch (error) {
-    console.error("Error in login:", error);
-    res.status(500).json({ error: "Error in login" });
+    console.error('Error in login:', error);
+    res.status(500).json({ error: 'Error in login' });
   }
 };
 
 //logoutuser
 const logoutUser = (req, res) => {
   try {
-    res.cookie("jwt", "", { maxAge: 1 });
-    return res.status(200).json({ message: "User logged out successfully" });
+    res.cookie('jwt', '', { maxAge: 1 });
+    return res.status(200).json({ message: 'User logged out successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
-    console.log("Error in signupUser: ", err.message);
+    console.log('Error in signupUser: ', err.message);
   }
 };
 
@@ -124,10 +144,10 @@ const followUnfollowUser = async (req, res) => {
     if (userTomodify._id.toString() === currUser._id.toString()) {
       return res
         .status(400)
-        .json({ error: "you cant follow or unfollow yourself" });
+        .json({ error: 'you cant follow or unfollow yourself' });
     }
     if (!currUser) {
-      return res.status(400).json({ error: "Login to follow or unfollow" });
+      return res.status(400).json({ error: 'Login to follow or unfollow' });
     }
     if (userTomodify.followers.includes(currUser._id)) {
       await userTomodify.followers.pull(currUser._id);
@@ -147,7 +167,7 @@ const followUnfollowUser = async (req, res) => {
       .json({ message: `You just followed ${userTomodify.username}` });
   } catch (error) {
     res.status(500).json({ error: error.message });
-    console.log("Error in follow unfollow user: ", error.message);
+    console.log('Error in follow unfollow user: ', error.message);
   }
 };
 
@@ -156,23 +176,23 @@ const updateUser = async (req, res) => {
   try {
     let { id } = req.params;
     let { name, username, email, password, bio } = req.body;
-    let pfp
-    if(req.file){
+    let pfp;
+    if (req.file) {
       pfp = req.file.path;
     }
- 
+
     console.log(pfp);
     let currUser = req.user;
-    let user = await User.findById(id).select("-password");
+    let user = await User.findById(id).select('-password');
 
     if (!user) {
-      return res.status(400).json({ error: "User not found" });
+      return res.status(400).json({ error: 'User not found' });
     }
 
     if (id.toString() !== currUser._id.toString()) {
       return res
         .status(400)
-        .json({ error: "You cannot update other users profiles" });
+        .json({ error: 'You cannot update other users profiles' });
     }
     if (password) {
       const salt = await bcrypt.genSalt(10);
@@ -186,9 +206,9 @@ const updateUser = async (req, res) => {
     user.bio = bio || user.bio;
     await user.save();
     user.password = null;
-    res.status(200).json({ message: "profile updated successfully" });
+    res.status(200).json({ message: 'profile updated successfully' });
   } catch (error) {
-    console.log("Error in update user: ", error.message);
+    console.log('Error in update user: ', error.message);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -197,7 +217,7 @@ const getAllUser = async (req, res) => {
   try {
     let AllUser = await User.find({}).select('-password');
     if (AllUser.length == 0) {
-      return res.status(400).json({ error: "no users yet" });
+      return res.status(400).json({ error: 'no users yet' });
     }
     return res.status(200).json(AllUser);
   } catch (error) {
@@ -213,5 +233,5 @@ module.exports = {
   followUnfollowUser,
   updateUser,
   getUser,
-  getAllUser
+  getAllUser,
 };
