@@ -26,10 +26,10 @@ mongoose
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  'https://test0726-1-osck.vercel.app',
-  'https://bodolspace-frontend-baljirs-projects.vercel.app',
-  'https://bodolspace-frontend-git-main-baljirs-projects.vercel.app',
-  'https://bodolspace-frontend-mvlxk6dpj-baljirs-projects.vercel.app',
+  'https://bodol-last.vercel.app',
+  'https://bodol-last-baljirs-projects.vercel.app',
+  'https://bodol-last-git-main-baljirs-projects.vercel.app',
+  'https://bodol-last-d1cbkicyv-baljirs-projects.vercel.app',
   'https://*.vercel.app',
 ];
 
