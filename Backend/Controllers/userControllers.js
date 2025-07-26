@@ -35,71 +35,25 @@ const getUser = async (req, res) => {
 };
 //Signup user
 const registeruser = async (req, res) => {
-  let { name, username, email, password } = req.body;
-
   try {
-    console.log('Signup attempt with data:', {
-      name,
-      username,
-      email,
-      password: '***',
+    console.log('=== SIGNUP ENDPOINT REACHED ===');
+    console.log('Method:', req.method);
+    console.log('Headers:', req.headers);
+    console.log('Body:', req.body);
+    
+    let { name, username, email, password } = req.body;
+    
+    // Just return success to test basic functionality
+    return res.status(200).json({ 
+      success: true,
+      message: "Test endpoint working",
+      receivedData: { name, username, email, hasPassword: !!password }
     });
-
-    if (!name || !username || !email || !password) {
-      console.log('Missing fields:', {
-        name: !!name,
-        username: !!username,
-        email: !!email,
-        password: !!password,
-      });
-      return res.status(400).json({ error: 'All fields are required' });
-    }
-
-    if (password.length < 6) {
-      console.log('Password too short:', password.length);
-      return res.status(400).json({ error: 'Minimum length of password is 6' });
-    }
-
-    // Check if a user with the given email or username already exists
-    console.log('Checking for existing user...');
-    let user = await User.findOne({
-      $or: [{ email: email }, { username: username }],
-    });
-
-    if (user) {
-      console.log('User already exists:', user._id);
-      return res.status(400).json({
-        error: 'Sorry, a user with this email or username already exists',
-      });
-    }
-
-    // Hash the password
-    console.log('Hashing password...');
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Create a new user
-    console.log('Creating new user...');
-    let newUser = await User.create({
-      name: name,
-      username: username,
-      email: email,
-      password: hashedPassword,
-    });
-    console.log('User created successfully:', newUser._id);
-
-    newUser = await User.findById(newUser._id).select('-password');
-
-    if (newUser) {
-      console.log('Generating JWT token...');
-      let usercookie = genjwttoken(newUser._id, res);
-      console.log('JWT token generated successfully');
-      return res.status(200).json(newUser);
-    }
+    
   } catch (error) {
     console.error('Error in signup:', error.message);
     console.error('Full error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 };
 
