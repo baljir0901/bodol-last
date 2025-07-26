@@ -1,0 +1,33 @@
+{
+  "name": "bodol-space-backend",
+  "version": "1.0.0",
+  "description": "Bodol.space backend API - Mongolian social media platform",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [
+    "social-media",
+    "mongolian",
+    "api",
+    "express",
+    "mongodb"
+  ],
+  "author": "HmadAfzal <baljir0901@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.2.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.3.0",
+    "multer": "^1.4.5-lts.1",
+    "multer-remote-storage": "^0.0.6",
+    "storage": "^0.2.0"
+  }
+}

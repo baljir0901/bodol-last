@@ -1,0 +1,16 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Main thought bubble -->
+  <ellipse cx="16" cy="13" rx="11" ry="8" fill="#4F46E5" stroke="#3730A3" stroke-width="1"/>
+  
+  <!-- Medium bubble -->
+  <circle cx="10" cy="23" r="3" fill="#4F46E5" stroke="#3730A3" stroke-width="1"/>
+  
+  <!-- Small bubble -->
+  <circle cx="7" cy="28" r="1.5" fill="#4F46E5"/>
+  
+  <!-- Inner highlight for depth -->
+  <ellipse cx="13" cy="10" rx="4" ry="3" fill="white" opacity="0.4"/>
+  
+  <!-- Small highlight dot -->
+  <circle cx="12" cy="9" r="1" fill="white" opacity="0.8"/>
+</svg>
