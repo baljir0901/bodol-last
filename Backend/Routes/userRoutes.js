@@ -12,8 +12,15 @@ const isAuthenticated = require('../Middlewares/isAuthenticated');
 const userRouter = new express.Router();
 
 const multer = require('multer');
-const { storage } = require('../utils/configCloudinary');
-const upload = multer({ storage: storage });
+// Cloudinary configuration-г хойшлуулах
+let upload;
+try {
+  const { storage } = require('../utils/configCloudinary');
+  upload = multer({ storage: storage });
+} catch (error) {
+  console.log('Cloudinary configuration error:', error);
+  upload = multer({ dest: 'uploads/' }); // fallback
+}
 
 //getUser
 userRouter.get('/v1/user/:query', getUser);
