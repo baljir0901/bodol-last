@@ -69,10 +69,10 @@ app.get('/', (req, res) => {
   res.send('running...');
 });
 
-// Routes
-app.use(userRouter);
-app.use(postRouter);
-app.use(replyRouter);
+// API Routes with /api prefix
+app.use('/api', userRouter);
+app.use('/api', postRouter);
+app.use('/api', replyRouter);
 
 // Сервер эхлүүлэх
 app.listen(port, () => {
