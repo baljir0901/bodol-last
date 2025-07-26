@@ -12,6 +12,26 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
+// CORS тохиргоо - Vercel serverless functions зориулсан (FIRST MIDDLEWARE)
+app.use((req, res, next) => {
+  // Set CORS headers for all requests
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+  );
+  res.header('Access-Control-Allow-Credentials', 'true');
+
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(200).send();
+    return;
+  }
+
+  next();
+});
+
 // MongoDB холболт
 mongoose
   .connect(process.env.MONGO_ATLAS_URI, {
@@ -25,23 +45,6 @@ mongoose
   .catch((error) => {
     console.error('Error connecting to MongoDB:', error);
   });
-
-// CORS тохиргоо - Vercel serverless functions зориулсан
-app.use((req, res, next) => {
-  // Set CORS headers for all requests
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    res.status(200).send();
-    return;
-  }
-  
-  next();
-});
 
 // Middleware-ууд
 app.use(cookieParser());
