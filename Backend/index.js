@@ -1,9 +1,18 @@
 const express = require('express');
 const dotenv = require('dotenv');
-dotenv.config();
-const port = process.env.PORT || 3000;
 const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
+const cors = require('cors');
+
+const userRouter = require('./Routes/userRoutes');
+const postRouter = require('./Routes/postRoutes');
+const replyRouter = require('./Routes/replyRoute');
+
+dotenv.config();
 const app = express();
+const port = process.env.PORT || 3000;
+
+// MongoDB холболт
 mongoose
   .connect(process.env.MONGO_ATLAS_URI)
   .then(() => {
@@ -13,37 +22,62 @@ mongoose
     console.error('Error connecting to MongoDB:', error);
   });
 
-const cookieParser = require('cookie-parser');
-const cors = require('cors');
-const userRouter = require('./Routes/userRoutes');
-const postRouter = require('./Routes/postRoutes');
-const replyRouter = require('./Routes/replyRoute');
+// CORS тохиргоо - Production-д зориулсан
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://test0726-1-osck.vercel.app',
+  'https://bodolspace-frontend-baljirs-projects.vercel.app',
+  'https://bodolspace-frontend-git-main-baljirs-projects.vercel.app',
+  'https://bodolspace-frontend-mvlxk6dpj-baljirs-projects.vercel.app',
+  'https://*.vercel.app',
+];
 
 app.use(
   cors({
-    origin: [
-      'https://bodolspace-frontend-4aw3wxg4-baljirs-projects.vercel.app',
-      'http://localhost:3000',
-      'http://localhost:5173',
-    ],
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps)
+      if (!origin) return callback(null, true);
+
+      // Check if the origin is in the allowed list or is a vercel app
+      if (
+        allowedOrigins.some(
+          (allowed) =>
+            allowed === origin ||
+            (allowed.includes('*.vercel.app') && origin.endsWith('.vercel.app'))
+        )
+      ) {
+        return callback(null, true);
+      }
+
+      callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
+
+// Middleware-ууд
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
 
+// Root маршрут
 app.get('/', (req, res) => {
   res.send('running...');
 });
 
+// Routes
 app.use(userRouter);
 app.use(postRouter);
 app.use(replyRouter);
 
+// Сервер эхлүүлэх
 app.listen(port, () => {
   console.log(`App is listening at port:${port}`);
 });
+
+// Export for Vercel
+module.exports = app;
