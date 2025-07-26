@@ -37,23 +37,68 @@ const getUser = async (req, res) => {
 const registeruser = async (req, res) => {
   try {
     console.log('=== SIGNUP ENDPOINT REACHED ===');
-    console.log('Method:', req.method);
-    console.log('Headers:', req.headers);
-    console.log('Body:', req.body);
-    
+    console.log('Request Body:', req.body);
+
     let { name, username, email, password } = req.body;
-    
-    // Just return success to test basic functionality
-    return res.status(200).json({ 
-      success: true,
-      message: "Test endpoint working",
-      receivedData: { name, username, email, hasPassword: !!password }
+
+    // Field validation
+    if (!name || !username || !email || !password) {
+      console.log('Missing required fields');
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    if (password.length < 6) {
+      console.log('Password too short');
+      return res.status(400).json({ error: 'Minimum length of password is 6' });
+    }
+
+    console.log('Checking for existing user...');
+    // Check if user already exists
+    let existingUser = await User.findOne({
+      $or: [{ email: email }, { username: username }],
     });
-    
+
+    if (existingUser) {
+      console.log('User already exists');
+      return res.status(400).json({
+        error: 'Sorry, a user with this email or username already exists',
+      });
+    }
+
+    console.log('Hashing password...');
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    console.log('Creating new user in database...');
+    // Create new user
+    let newUser = await User.create({
+      name: name,
+      username: username,
+      email: email,
+      password: hashedPassword,
+    });
+
+    console.log('User created successfully with ID:', newUser._id);
+
+    // Get user without password
+    newUser = await User.findById(newUser._id).select('-password');
+
+    if (newUser) {
+      console.log('Generating JWT token...');
+      let usercookie = genjwttoken(newUser._id, res);
+      console.log('Registration successful!');
+      return res.status(200).json(newUser);
+    } else {
+      throw new Error('Failed to retrieve created user');
+    }
   } catch (error) {
     console.error('Error in signup:', error.message);
-    console.error('Full error:', error);
-    return res.status(500).json({ error: 'Internal server error', details: error.message });
+    console.error('Full error stack:', error);
+    return res.status(500).json({
+      error: 'Internal server error',
+      details: error.message,
+    });
   }
 };
 
