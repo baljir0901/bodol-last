@@ -14,7 +14,11 @@ const port = process.env.PORT || 3000;
 
 // MongoDB холболт
 mongoose
-  .connect(process.env.MONGO_ATLAS_URI)
+  .connect(process.env.MONGO_ATLAS_URI, {
+    serverSelectionTimeoutMS: 30000, // 30 секунд хүлээх
+    socketTimeoutMS: 45000, // 45 секунд socket timeout
+    bufferMaxEntries: 0, // Buffer-г идэвхгүй болгох
+  })
   .then(() => {
     console.log('Connected to MongoDB');
   })
