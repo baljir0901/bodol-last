@@ -16,7 +16,7 @@ import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import axios from "axios";
+import api from "../utils/api";
 import { useNavigate } from "react-router-dom";
 
 const Signupform = () => {
@@ -40,7 +40,7 @@ const Signupform = () => {
   const onSubmit = async (data) => {
     try {
       setIsLoading(true)
-      let response = await axios({
+      let response = await api({
         url: "/api/v1/signup",
         method: "post",
         headers: {
